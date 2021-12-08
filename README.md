@@ -2,7 +2,7 @@
 This repository contains full machine learning pipeline of the Zillow Houses competition on Kaggle platform.
 
 
-Pipeline is consists of 5 general steps
+Pipeline is consists of 10 general steps
 1) Exploratory Data Analysis (Univariate, Bivariate, Hypothesis testing, Confident Interals)
 2) Missing values (different advanced and not strategies to impute: MICE algo with the using of gradient boosting, lightgbm etc.)
 3) Duplicate checking
