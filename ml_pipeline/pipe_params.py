@@ -147,6 +147,18 @@ select_from_model_params = {
 # -------------------------- Random forest pipeline ---------------------
 # preprocessing_pipe + Random Forest model
 
+def get_preprocessed_data(dirty_data, data_transformer: zp.DataTransformer):
+    """
+    Makes from dirty data clean using DataTransformer
+    """
+    preprocessed_data = preprocessing_pipe.transform(dirty_data)
+
+    X_clean = preprocessed_data[preprocessed_data.columns[~preprocessed_data.columns.isin([zp.target_var])]]
+    y_clean = preprocessed_data[zp.target_var]
+
+    return X_clean, y_clean
+
+
 def main():
     preprocessing_pipe = zp.DataTransformer(steps=[
         OneHotEncoder(),
@@ -160,10 +172,7 @@ def main():
         StandardScaler(),
     ])
 
-    preprocessed_data = preprocessing_pipe.transform(df)
-
-    X = preprocessed_data[preprocessed_data.columns[~preprocessed_data.columns.isin([zp.target_var])]]
-    y = preprocessed_data[zp.target_var]
+    X, y = get_preprocessed_data(df, preprocessing_pipe)
 
     param_grid = {
         'RandomForestRegressor__n_estimators': [100, 150, 170],
