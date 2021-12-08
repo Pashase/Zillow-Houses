@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import xgboost as xgb
 import zillow_pipeline as zp
 
 from sklearn.pipeline import make_pipeline
@@ -156,6 +157,7 @@ def main():
         zp.FeatureCreator(),
         zp.FeatureTransformer(features_names=selected_num_features_to_log, strategy=strategy),
         zp.FeatureSelector(model_selectors=model_selectors, select_from_model_params=select_from_model_params),
+        StandardScaler(),
     ])
 
     preprocessed_data = preprocessing_pipe.transform(df)
@@ -193,7 +195,48 @@ def main():
 
     test_mae = mean_absolute_error(y_test, y_pred)
 
-    print(f'MAE on test set: {test_mae}')
+    print(f'MAE on test set for randoms forest: {test_mae}')
+
+    # -------------------------- Gradient Boosting pipeline ---------------------
+    # preprocessing_pipe + xgboost model
+
+    param_grid = {
+        'xgb_model__n_estimators': [200, 250, 300, 500],
+        'xgb_model__eta': [0.1, 0.2, 0.3],
+        'xgb_model__max_depth': [4, 5, 6, 7],
+        'xgb_model__subsample': [0.7, 0.8],
+    }
+
+    xgb_model = xgb.XGBRegressor(n_estimators=220, eta=0.2, max_depth=4, subsample=0.7)
+
+    xgb_pipeline = Pipeline([
+        #     ('pca', PCA()),
+        ('xgb_model', xgb_model),
+    ])
+
+    search = GridSearchCV(xgb_pipeline, param_grid, scoring='neg_mean_absolute_error', n_jobs=-1, cv=cv_strategy,
+                          verbose=1)
+
+    # tuning params on train set
+    search.fit(X_train, y_train)
+
+    best_xgb_model = search.best_estimator_
+
+    dm_train = xgb.DMatrix(X_train, label=y_train)
+    dm_test = xgb.DMatrix(X_test, label=y_test)
+
+    boosting_iterations = 10000
+    watchlist = [(dm_train, 'train'), (dm_test, 'test')]
+    best_xgb_model.train(search.best_params_, dm_train,
+                         boosting_iterations, watchlist,
+                         early_stopping_rounds=100, verbose_eval=10)
+
+    y_pred_xgb = best_xgb_model.predict(dm_test)
+    test_xgb_mae = mean_absolute_error(y_test, y_pred_xgb)
+
+    print(f'MAE on test set for xgboost: {test_xgb_mae}')
+
+    return None
 
 
 if __name__ == '__main__':
