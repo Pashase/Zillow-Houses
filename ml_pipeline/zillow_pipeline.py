@@ -8,6 +8,7 @@ from sklearn.feature_selection import SelectFromModel
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import RFE, RFECV
 from sklearn.pipeline import make_pipeline
+from joblib import dump, load
 
 target_var = 'logerror'
 OUTLIERS_DETECTOR_PATH = 'final_detector.joblib'
