@@ -3,7 +3,7 @@ This repository contains full machine learning pipeline of the Zillow Houses com
 
 
 Pipeline is consists of 10 general steps
-1) Exploratory Data Analysis (Univariate, Bivariate, Hypothesis testing, Confident Interals)
+1) Exploratory Data Analysis (Univariate, Bivariate, Hypothesis testing, Confident Intervals)
 2) Missing values (different advanced and not strategies to impute: MICE algo with the using of gradient boosting, lightgbm etc.)
 3) Duplicate checking
 4) Advanced Anomaly Detection (models such as KNN, Isolation Forests, and final detector witch aggregates results from base models - SUOD)
