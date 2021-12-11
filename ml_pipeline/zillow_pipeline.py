@@ -1,15 +1,13 @@
 import typing as tp
+import pandas as pd
 import miceforest as mf
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.feature_selection import SelectFromModel
-from sklearn.preprocessing import StandardScaler
-from sklearn.feature_selection import RFE, RFECV
-from sklearn.pipeline import make_pipeline
-from joblib import dump, load
+from sklearn.pipeline import Pipeline
 
+from joblib import dump, load
 
 target_var = 'logerror'
 OUTLIERS_DETECTOR_PATH = 'final_detector.joblib'
@@ -21,16 +19,16 @@ class FastMiceTransformer(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, *, imp_kernel_params: dict, mice_params: dict):
-        self.__imp_kernel_params = imp_kernel_params
-        self.__mice_params = mice_params
+        super().__init__()
+        self.imp_kernel_params = imp_kernel_params
+        self.mice_params = mice_params
 
     def fit(self):
         return self
 
-    def transform(self, data):
-        print('FastMiceTransformer transform method is called')
-
-        data_ = data.copy()
+    def transform(self, X, y=None):
+        print('FastMiceTransformer transform is called')
+        data_ = pd.DataFrame(X, y)
         mf_kernel = mf.ImputationKernel(data_, **self.__imp_kernel_params)
 
         mf_kernel.mice(**self.__mice_params)
@@ -40,7 +38,7 @@ class FastMiceTransformer(BaseEstimator, TransformerMixin):
                          for ds_idx in range(self.__imp_kernel_params['datasets']))
 
         # average all across datasets and get the final dataset
-        imputed_ds = __build_final_imputed_dataset(*datasets_list)
+        imputed_ds = self.__build_final_imputed_dataset(*datasets_list)
 
         return imputed_ds
 
@@ -50,7 +48,7 @@ class FastMiceTransformer(BaseEstimator, TransformerMixin):
         by_row_index = concatenated_ds.groupby(concatenated_ds.index)
         final_imputed_ds = by_row_index.mean()
 
-        final_imputed_ds = __undummify(final_imputed_ds)
+        final_imputed_ds = self.__undummify(final_imputed_ds)
 
         return final_imputed_ds
 
@@ -78,6 +76,7 @@ class FastMiceTransformer(BaseEstimator, TransformerMixin):
 
 class SemiDtypeFeaturesRounder(BaseEstimator, TransformerMixin):
     def __init__(self, *, semi_features: list, decimals: int = 0):
+        super().__init__()
         self.__semi_features = semi_features
         self.__decimals = decimals
 
@@ -125,6 +124,7 @@ class AnomalyDetector(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, *, suod_detector_params: dict = None, detector_model_path: str = None):
+        super().__init__()
         self.__suod_detector_params = suod_detector_params
         self.__detector_model_path = detector_model_path
 
@@ -206,6 +206,7 @@ class FeatureTransformer(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, *, features_names: list, strategy: tp.Callable):
+        super().__init__()
         self.__features_names = features_names
         self.__strategy = strategy
 
@@ -227,6 +228,7 @@ class FeatureSelector(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, *, model_selectors: list, select_from_model_params: dict):
+        super().__init__()
         self.__model_selectors = model_selectors
         self.__select_from_model_params = select_from_model_params
 
@@ -257,15 +259,23 @@ class FeatureSelector(BaseEstimator, TransformerMixin):
 
 
 class DataTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, steps):
-        self.__steps = steps
+    def __init__(self, steps: list):
+        super().__init__()
+        self.steps = steps
 
-    def transform(self, data):
+    def fit(self):
+        return self
 
+    def transform(self, X, y=None):
         """
         Preprocessing all data from zero by given preprocessing pipeline
         """
-        preprocessing_pipe = make_pipeline([*self.__steps])
-        preprocessed_data = preprocessing_pipe.transform(data)
+
+        step_names = (step.__class__.__name__ for step in self.steps)
+        steps_info = list(zip(step_names, self.steps))
+
+        preprocessing_pipe = Pipeline(steps_info)
+
+        preprocessed_data = preprocessing_pipe.transform(X)
 
         return preprocessed_data
