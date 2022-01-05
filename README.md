@@ -12,6 +12,6 @@ Pipeline is consists of 10 general steps
 7) Feature Transformation of some features with hypothesis testing on it (fitting distributions with some statistical tests)
 8) Advanced Feature Selection and not - Recursive Feature Elimination with cross-validation on different tree-based models such as Gradient Boosting, Random Forests etc) and of course Lasso with L1-norm, Feature Importances of trees and combine them into one algorithm witch takes in account all the above method
 9) Modeling (different regression models, fine-tuning, learning curves, validation curves, Residuals Analysis etc.). Later, i wan't to use some stacking stategies on boosted trees and some NN models
-10) Results analysis: best model selection with the using of confident intervals and different non-parametric statistical tests etc.
+10) Results analysis: best model selection with the using of confident intervals and different non-parametric statistical tests (Poisson bootstrap etc).
 
 This solution also contains custom preprocessing pipeline witch automaticly can do 2-8 steps ( all in :) )
