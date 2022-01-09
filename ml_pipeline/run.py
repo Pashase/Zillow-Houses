@@ -1,6 +1,8 @@
 import xgboost as xgb
 import zillow_pipeline as zp
 
+from sklearn.pipeline import Pipeline
+
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 
@@ -9,37 +11,50 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import ExtraTreesRegressor
 
+from pipe_params import dirty_data
 
-def get_preprocessed_data(dirty_data, steps: list):
+from pipe_params import impute_kernel_params
+from pipe_params import mice_params
+from pipe_params import semi_features
+from pipe_params import suod_params
+from pipe_params import selected_num_features_to_transform
+from pipe_params import transform_strategy
+from pipe_params import model_selectors
+from pipe_params import select_from_model_params
+
+
+def get_preprocessed_data(data, steps: list):
     """
     Makes from dirty data clean using DataTransformer
     """
-    X_dirty = dirty_data[dirty_data.columns[~dirty_data.columns.isin([zp.target_var])]]
-    y_dirty = dirty_data[zp.target_var]
+    X_dirty = data[data.columns[~data.columns.isin([zp.target_var])]]
+    y_dirty = data[zp.target_var]
 
     step_names = (step.__class__.__name__ for step in steps)
     steps_info = list(zip(step_names, steps))
 
     preprocessing_pipe = Pipeline(steps_info)
-    preprocessing_pipe.fit(X_dirty, y_dirty)
-    preprocessed_data = preprocessing_pipe.transform(X_dirty, y_dirty)
+    preprocessed_data = preprocessing_pipe.fit_transform(X_dirty, y_dirty)
 
-    X_clean = preprocessed_data[preprocessed_data.columns[~preprocessed_data.columns.isin([zp.target_var])]]
+    X_clean = preprocessed_data.drop(zp.target_var, axis=1)
     y_clean = preprocessed_data[zp.target_var]
 
     return X_clean, y_clean
 
 
-# -------------------------- Random forest & XGBoost Pipeline ---------------------
-# preprocessing_pipe +  model
-
 def main():
     preprocessing_steps = [
         OneHotEncoder(),
         zp.FastMiceTransformer(imp_kernel_params=impute_kernel_params, mice_params=mice_params),
+        zp.SemiDtypeFeaturesRounder(semi_features=semi_features),
+        zp.DuplicateDetector(),
+        zp.AnomalyDetector(suod_detector_params=suod_params),
+        zp.FeatureCreator(),
+        zp.FeatureTransformer(features_names=selected_num_features_to_transform, strategy=transform_strategy),
+        zp.FeatureSelector(model_selectors=model_selectors, select_from_model_params=select_from_model_params),
     ]
 
-    X, y = get_preprocessed_data(df, preprocessing_steps)
+    X, y = get_preprocessed_data(dirty_data, preprocessing_steps)
 
     param_grid = {
         'RandomForestRegressor__n_estimators': [100, 150, 170],
