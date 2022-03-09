@@ -20,6 +20,11 @@ def main():
     test_mae = mean_absolute_error(y_test, y_pred)
 
     print(f'MAE on test set for random forest model: {test_mae}')
+    print(f'Write predictions to {main_pipeline.src.data.constants.PREDICTIONS_PATH}')
+
+    pd.DataFrame(y_pred).to_pickle(main_pipeline.src.data.constants.PREDICTIONS_PATH + '/example_predictions.pkl')
+
+    print('Finished')
 
 
 if __name__ == '__main__':
