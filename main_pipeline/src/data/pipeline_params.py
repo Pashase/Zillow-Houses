@@ -1,6 +1,6 @@
 import numpy as np
 
-import src.data.preprocessing_pipeline as pipe_tfs
+import main_pipeline.src.data.preprocessing_pipeline as pipe_tfs
 
 from pyod.models.lof import LOF
 from pyod.models.hbos import HBOS

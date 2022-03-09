@@ -1,9 +1,8 @@
 import xgboost as xgb
-
 import pandas as pd
 
-import src.data.constants
-from src.data.make_dataset import save_data
+import main_pipeline.src.data.constants
+from main_pipeline.src.data.make_dataset import save_data
 
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
@@ -18,10 +17,10 @@ from joblib import dump, load
 def main():
     # read clean - preprocessed data
 
-    data = pd.read_csv(src.data.constants.PATH_TO_SAVE_CLEAN_DF)
+    data = pd.read_csv(main_pipeline.src.data.constants.PATH_TO_SAVE_CLEAN_DF)
 
-    X = data[data.columns[~data.columns.isin([src.data.constants.TARGET_VAR])]]
-    y = data[src.data.constants.TARGET_VAR]
+    X = data[data.columns[~data.columns.isin([main_pipeline.src.data.constants.TARGET_VAR])]]
+    y = data[main_pipeline.src.data.constants.TARGET_VAR]
 
     param_grid = {
         'n_estimators': [10, 15, 17],
@@ -42,8 +41,8 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_frac, random_state=0,
                                                         shuffle=True)
 
-    save_data(X_train, y_train, src.data.constants.SPLIT_TRAIN_DATA_PATH)
-    save_data(X_test, y_test, src.data.constants.SPLIT_TEST_DATA_PATH)
+    save_data(X_train, y_train, main_pipeline.src.data.constants.SPLIT_TRAIN_DATA_PATH)
+    save_data(X_test, y_test, main_pipeline.src.data.constants.SPLIT_TEST_DATA_PATH)
 
     # tuning params on train set
     search.fit(X_train, y_train)
@@ -58,8 +57,8 @@ def main():
           'Model is trained!')
 
     print('Saving the model..')
-    dump(best_rf, src.data.constants.TRAINED_MODEL_PATH)
-    print(f'Saved to: {src.data.constants.TRAINED_MODEL_PATH}')
+    dump(best_rf, main_pipeline.src.data.constants.TRAINED_MODEL_PATH)
+    print(f'Saved to: {main_pipeline.src.data.constants.TRAINED_MODEL_PATH}')
     # -------------------------- Gradient Boosting pipeline ---------------------
     # preprocessing_pipe + xgboost model
 
@@ -94,7 +93,7 @@ def main():
     #
     # print(f'MAE on test set for xgboost: {test_xgb_mae}')
     #
-    # dump(best_xgb_model, src.data.constants.TRAINED_MODEL_PATH)
+    # dump(best_xgb_model, main_pipeline.src.data.constants.TRAINED_MODEL_PATH)
 
 
 if __name__ == '__main__':

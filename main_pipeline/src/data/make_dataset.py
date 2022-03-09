@@ -1,9 +1,9 @@
 import pandas as pd
 import typing as tp
 
-import src.data.constants
-import src.data.pipeline_params
-import src.data.preprocessing_pipeline as pipe_tfs
+import main_pipeline.src.data.constants
+import main_pipeline.src.data.pipeline_params
+import main_pipeline.src.data.preprocessing_pipeline as pipe_tfs
 
 from functools import wraps
 from sklearn.pipeline import Pipeline
@@ -23,7 +23,7 @@ def load_data(prop_data_path: str,
 
 def save_data(X: pd.DataFrame, y: pd.Series, path: str) -> None:
     data_ = X.copy()
-    data_[src.data.constants.TARGET_VAR] = y.copy()
+    data_[main_pipeline.src.data.constants.TARGET_VAR] = y.copy()
 
     data_.to_csv(path, index=False)
 
@@ -86,7 +86,7 @@ def convert_dtypes(categorical_names: tp.Tuple) -> tp.Callable:
     return decorator
 
 
-@convert_dtypes(categorical_names=src.data.constants.CATEGORICAL_FEATURES_NAMES)
+@convert_dtypes(categorical_names=main_pipeline.src.data.constants.CATEGORICAL_FEATURES_NAMES)
 @make_filtering(miss_percent=.8)
 def get_dirty_data(prop_2016: pd.DataFrame,
                    train_2016_v2: pd.DataFrame,
@@ -100,25 +100,25 @@ def get_dirty_data(prop_2016: pd.DataFrame,
 
 
 def main() -> None:
-    prop_2016, train_2016_v2, sub_example = load_data(src.data.constants.PROP_DATA_PATH,
-                                                      src.data.constants.TRAIN_DATA_PATH,
-                                                      src.data.constants.SAMPLE_SUB_DATA_PATH)
+    prop_2016, train_2016_v2, sub_example = load_data(main_pipeline.src.data.constants.PROP_DATA_PATH,
+                                                      main_pipeline.src.data.constants.TRAIN_DATA_PATH,
+                                                      main_pipeline.src.data.constants.SAMPLE_SUB_DATA_PATH)
     df_dirty_train = pd.get_dummies(get_dirty_data(prop_2016, train_2016_v2))
 
-    X_dirty = df_dirty_train[df_dirty_train.columns[~df_dirty_train.columns.isin([src.data.constants.TARGET_VAR])]]
-    y_dirty = df_dirty_train[src.data.constants.TARGET_VAR]
+    X_dirty = df_dirty_train[df_dirty_train.columns[~df_dirty_train.columns.isin([main_pipeline.src.data.constants.TARGET_VAR])]]
+    y_dirty = df_dirty_train[main_pipeline.src.data.constants.TARGET_VAR]
 
     prep_pipe = Pipeline(steps=[
-        ('mice imputer', src.data.pipeline_params.m_imp),
-        ('rounder', src.data.pipeline_params.rounder),
-        ('duplicate detector', src.data.pipeline_params.dupl_detector),
-        # ('anomaly detector', src.data.pipeline_params.anom_detector),
-        ('feature creator', src.data.pipeline_params.feature_creator),
-        ('feature transformer', src.data.pipeline_params.feature_transformer),
-        # ('feature selector', src.data.pipeline_params.feature_selector),
+        ('mice imputer', main_pipeline.src.data.pipeline_params.m_imp),
+        ('rounder', main_pipeline.src.data.pipeline_params.rounder),
+        ('duplicate detector', main_pipeline.src.data.pipeline_params.dupl_detector),
+        # ('anomaly detector', main_pipeline.src.data.pipeline_params.anom_detector),
+        ('feature creator', main_pipeline.src.data.pipeline_params.feature_creator),
+        ('feature transformer', main_pipeline.src.data.pipeline_params.feature_transformer),
+        # ('feature selector', main_pipeline.src.data.pipeline_params.feature_selector),
     ])
 
-    transformers = (src.data.pipeline_params.feature_selector,)
+    transformers = (main_pipeline.src.data.pipeline_params.feature_selector,)
 
     data_transformer = pipe_tfs.DataTransformer(X_dirty, y_dirty, prep_pipe, *transformers)
 
@@ -127,9 +127,9 @@ def main() -> None:
     # y
     y_clean = y_dirty.copy()
 
-    X_clean[src.data.constants.TARGET_VAR] = y_clean
+    X_clean[main_pipeline.src.data.constants.TARGET_VAR] = y_clean
 
-    X_clean.to_csv(src.data.constants.PATH_TO_SAVE_CLEAN_DF, index=False)
+    X_clean.to_csv(main_pipeline.src.data.constants.PATH_TO_SAVE_CLEAN_DF, index=False)
 
     return None
 

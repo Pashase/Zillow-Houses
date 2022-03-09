@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import typing as tp
 
-import src.data.constants
+import main_pipeline.src.data.constants
 
 from joblib import dump, load
 
