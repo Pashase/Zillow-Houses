@@ -103,7 +103,7 @@ def main() -> None:
     prop_2016, train_2016_v2, sub_example = load_data(src.data.constants.PROP_DATA_PATH,
                                                       src.data.constants.TRAIN_DATA_PATH,
                                                       src.data.constants.SAMPLE_SUB_DATA_PATH)
-    df_dirty_train = pd.get_dummies(get_dirty_data(prop_2016, train_2016_v2)[150:250])
+    df_dirty_train = pd.get_dummies(get_dirty_data(prop_2016, train_2016_v2))
 
     X_dirty = df_dirty_train[df_dirty_train.columns[~df_dirty_train.columns.isin([src.data.constants.TARGET_VAR])]]
     y_dirty = df_dirty_train[src.data.constants.TARGET_VAR]
