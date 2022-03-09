@@ -1,4 +1,7 @@
+import os
+
 # change to args from com line
+PROJ_PATH = os.path.dirname(os.path.abspath(os.path.pardir))
 DATA_PATH = '/Users/pashase_/Desktop/zillow-prize-1'
 
 PROP_DATA_PATH = f'{DATA_PATH}/properties_2016.csv'
@@ -13,6 +16,10 @@ SPLIT_TRAIN_DATA_PATH = f'{DATA_PATH}/split/train.csv'
 SPLIT_TEST_DATA_PATH = f'{DATA_PATH}/split/test.csv'
 
 OUTLIERS_DETECTOR_PATH = f'{DATA_PATH}/detectors/outl_detector.joblib'
+PREDICTIONS_PATH = f'{PROJ_PATH}/src/predictions'
+
+PROCESSED_DATA_PATH = f'{PROJ_PATH}/data/processed'
+RAW_DATA_PATH = f'{PROJ_PATH}/data/raw'
 
 # categorical features
 CATEGORICAL_FEATURES_NAMES = [
