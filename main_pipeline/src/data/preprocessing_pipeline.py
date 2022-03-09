@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import typing as tp
 
+import src.data.constants
+
 from joblib import dump, load
 
 from sklearn.exceptions import NotFittedError
@@ -155,7 +157,7 @@ class AnomalyDetector(BaseEstimator, TransformerMixin):
         self.detect_kernel.fit(X)
 
         if self.detector_model_path:
-            dump(final_detector, OUTLIERS_DETECTOR_PATH)
+            dump(final_detector, src.data.constants.OUTLIERS_DETECTOR_PATH)
 
         return self
 
