@@ -13,6 +13,7 @@ def load_data(prop_data_path: str,
               train_ds_path: str,
               sample_sub_path: str,
               **kwargs) -> tp.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+
     # loading data
     prop_2016 = pd.read_csv(prop_data_path)
     train_2016_v2 = pd.read_csv(train_ds_path, parse_dates=['transactiondate'])
@@ -103,19 +104,20 @@ def main() -> None:
     prop_2016, train_2016_v2, sub_example = load_data(main_pipeline.src.data.constants.PROP_DATA_PATH,
                                                       main_pipeline.src.data.constants.TRAIN_DATA_PATH,
                                                       main_pipeline.src.data.constants.SAMPLE_SUB_DATA_PATH)
-    df_dirty_train = pd.get_dummies(get_dirty_data(prop_2016, train_2016_v2))
+    df_dirty_train = pd.get_dummies(get_dirty_data(prop_2016, train_2016_v2)[1000:1180])
 
-    X_dirty = df_dirty_train[df_dirty_train.columns[~df_dirty_train.columns.isin([main_pipeline.src.data.constants.TARGET_VAR])]]
+    X_dirty = df_dirty_train[
+        df_dirty_train.columns[~df_dirty_train.columns.isin([main_pipeline.src.data.constants.TARGET_VAR])]
+    ]
     y_dirty = df_dirty_train[main_pipeline.src.data.constants.TARGET_VAR]
 
     prep_pipe = Pipeline(steps=[
         ('mice imputer', main_pipeline.src.data.pipeline_params.m_imp),
         ('rounder', main_pipeline.src.data.pipeline_params.rounder),
         ('duplicate detector', main_pipeline.src.data.pipeline_params.dupl_detector),
-        # ('anomaly detector', main_pipeline.src.data.pipeline_params.anom_detector),
+        ('anomaly detector', main_pipeline.src.data.pipeline_params.anom_detector),
         ('feature creator', main_pipeline.src.data.pipeline_params.feature_creator),
         ('feature transformer', main_pipeline.src.data.pipeline_params.feature_transformer),
-        # ('feature selector', main_pipeline.src.data.pipeline_params.feature_selector),
     ])
 
     transformers = (main_pipeline.src.data.pipeline_params.feature_selector,)
@@ -129,7 +131,8 @@ def main() -> None:
 
     X_clean[main_pipeline.src.data.constants.TARGET_VAR] = y_clean
 
-    X_clean.to_csv(main_pipeline.src.data.constants.PATH_TO_SAVE_CLEAN_DF, index=False)
+    # serialize processed data
+    X_clean.to_pickle(main_pipeline.src.data.constants.PROCESSED_DATA_PATH + '/processed_df.pkl')
 
     return None
 
