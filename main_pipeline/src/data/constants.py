@@ -12,6 +12,8 @@ TRAINED_MODEL_PATH = f'{DATA_PATH}/models/rf_model.sav'
 SPLIT_TRAIN_DATA_PATH = f'{DATA_PATH}/split/train.csv'
 SPLIT_TEST_DATA_PATH = f'{DATA_PATH}/split/test.csv'
 
+OUTLIERS_DETECTOR_PATH = f'{DATA_PATH}/detectors/outl_detector.joblib'
+
 # categorical features
 CATEGORICAL_FEATURES_NAMES = [
     'airconditioningtypeid', 'architecturalstyletypeid', 'buildingqualitytypeid',
