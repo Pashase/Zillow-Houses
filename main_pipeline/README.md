@@ -1,6 +1,10 @@
 # Zillow-Houses
-This repository contains full machine learning pipeline of the Zillow Houses competition on Kaggle platform.
+This repository contains full machine learning pipeline of the Zillow Houses competition on Kaggle platform: https://www.kaggle.com/c/zillow-prize-1
 
+Solution contains an example sample of original data due to GitHub constaints on memory files size.
+
+To run the main pipeline should be a folder with raw data with the structure according to constants.py.
+Later, i'll do it for you using Docker.
 
 Pipeline is consists of 10 general steps
 1) Exploratory Data Analysis (Univariate, Bivariate, Hypothesis testing, Confidence Intervals)
